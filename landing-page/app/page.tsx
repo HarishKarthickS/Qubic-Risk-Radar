@@ -1,9 +1,9 @@
 import React from 'react';
-import { Shield, Zap, Activity, Globe, Database, Fingerprint, ExternalLink } from 'lucide-react';
+import { Shield, Zap, Activity, Globe, Database, Fingerprint, ExternalLink, Server } from 'lucide-react';
 
 export default function Home() {
   return (
-    <>
+    <main className="app-container">
       <div className="bg-grid"></div>
       <div className="bg-glow"></div>
 
@@ -217,6 +217,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
