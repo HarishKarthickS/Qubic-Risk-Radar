@@ -90,11 +90,11 @@ export default function Home() {
               </div>
               <div className="code-line">
                 <span className="line-num">9</span>
-                <span>        <span className="comment"># Trigger if transfer amount > 10,000,000</span></span>
+                <span>        <span className="comment"># Trigger if transfer amount &gt; 10,000,000</span></span>
               </div>
               <div className="code-line">
                 <span className="line-num">10</span>
-                <span>        <span className="keyword">return</span> event.amount > <span className="number">10_000_000</span></span>
+                <span>        <span className="keyword">return</span> event.amount &gt; <span className="number">10_000_000</span></span>
               </div>
               <div className="code-line">
                 <span className="line-num">11</span>
