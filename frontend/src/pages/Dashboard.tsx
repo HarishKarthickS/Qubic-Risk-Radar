@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, AlertTriangle, TrendingUp, Shield } from 'lucide-react';
 import { apiClient } from '../api/client';
 import type { Detection, AnalyticsOverview } from '../types';
 import './Dashboard.css';
@@ -18,7 +17,7 @@ export default function Dashboard() {
         try {
             const [overviewData, detectionsData] = await Promise.all([
                 apiClient.getAnalyticsOverview(),
-                apiClient.getDetections({ page: 1, page_size: 5 })
+                apiClient.getDetections({ page: 1, page_size: 8 })
             ]);
             setOverview(overviewData);
             setRecentDetections(detectionsData.detections || []);
@@ -33,148 +32,80 @@ export default function Dashboard() {
         return (
             <div className="loading-container">
                 <div className="spinner"></div>
-                <p>Loading dashboard...</p>
+                <p>Syncing station…</p>
             </div>
         );
     }
 
-    const getSeverityColor = (severity: string) => {
-        const colors: Record<string, string> = {
-            CRITICAL: '#dc2626',
-            HIGH: '#f59e0b',
-            MEDIUM: '#3b82f6',
-            LOW: '#10b981',
-            INFO: '#6b7280'
-        };
-        return colors[severity] || '#6b7280';
-    };
-
     return (
         <div className="dashboard">
-            <div className="dashboard-header">
-                <h1>Dashboard</h1>
-                <p className="subtitle">Blockchain Security Overview</p>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="stats-grid">
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ backgroundColor: '#eff6ff' }}>
-                        <Activity color="#3b82f6" size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-label">Total Detections</p>
-                        <p className="stat-value">{overview?.total_detections || 0}</p>
-                        <p className="stat-change positive">This week: {overview?.detections_this_week || 0}</p>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ backgroundColor: '#fef2f2' }}>
-                        <AlertTriangle color="#dc2626" size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-label">Critical Alerts</p>
-                        <p className="stat-value">{overview?.by_severity?.CRITICAL || 0}</p>
-                        <p className="stat-change">Requires immediate attention</p>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ backgroundColor: '#fef3c7' }}>
-                        <TrendingUp color="#f59e0b" size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-label">High Priority</p>
-                        <p className="stat-value">{overview?.by_severity?.HIGH || 0}</p>
-                        <p className="stat-change">Review recommended</p>
-                    </div>
-                </div>
-
-                <div className="stat-card">
-                    <div className="stat-icon" style={{ backgroundColor: '#f0fdf4' }}>
-                        <Shield color="#10b981" size={24} />
-                    </div>
-                    <div className="stat-content">
-                        <p className="stat-label">Today's Activity</p>
-                        <p className="stat-value">{overview?.detections_today || 0}</p>
-                        <p className="stat-change">Last 24 hours</p>
-                    </div>
+            <div className="page-head">
+                <div>
+                    <h1>Station overview</h1>
+                    <p className="subtitle">Webhook ingest · rule hits · severity as signal</p>
                 </div>
             </div>
 
-            {/* Recent Detections */}
-            <div className="dashboard-section">
-                <div className="section-header">
-                    <h2>Recent Detections</h2>
-                    <Link to="/detections" className="view-all-link">View All →</Link>
+            <div className="metric-grid">
+                <div className="metric ok">
+                    <div className="k">Detections</div>
+                    <div className="v">{overview?.total_detections || 0}</div>
+                    <div className="n">week {overview?.detections_this_week || 0}</div>
                 </div>
+                <div className="metric crit">
+                    <div className="k">Critical</div>
+                    <div className="v">{overview?.by_severity?.CRITICAL || 0}</div>
+                    <div className="n">page now</div>
+                </div>
+                <div className="metric high">
+                    <div className="k">High</div>
+                    <div className="v">{overview?.by_severity?.HIGH || 0}</div>
+                    <div className="n">review queue</div>
+                </div>
+                <div className="metric med">
+                    <div className="k">Last 24h</div>
+                    <div className="v">{overview?.detections_today || 0}</div>
+                    <div className="n">window</div>
+                </div>
+            </div>
 
-                <div className="detections-list">
+            <div className="panel">
+                <div className="panel-bar">
+                    <span>Event log</span>
+                    <Link to="/detections" className="view-all">OPEN FULL TAPE →</Link>
+                </div>
+                <div className="panel-body">
                     {recentDetections.length === 0 ? (
                         <div className="empty-state">
-                            <Shield size={48} color="#9ca3af" />
-                            <p>No detections yet</p>
-                            <p className="empty-subtitle">Your system is being monitored</p>
+                            <p>NO HITS ON TAPE</p>
+                            <p className="subtitle">Ingest is live. Rules have not fired.</p>
                         </div>
                     ) : (
                         recentDetections.map((detection) => (
-                            <div key={detection.id} className="detection-card">
-                                <div className="detection-header">
-                                    <span
-                                        className="severity-badge"
-                                        style={{ backgroundColor: getSeverityColor(detection.severity) }}
-                                    >
-                                        {detection.severity}
-                                    </span>
-                                    <span className="category-badge">{detection.primary_category}</span>
-                                    <span className="anomaly-score">
-                                        Score: {Math.round(detection.anomaly_score * 100)}%
-                                    </span>
-                                </div>
-                                <p className="detection-summary">{detection.summary}</p>
-                                <div className="detection-footer">
-                                    <span className="timestamp">
-                                        {new Date(detection.created_at).toLocaleString()}
-                                    </span>
-                                    <Link to={`/detections`} className="details-link">
-                                        View Details →
-                                    </Link>
-                                </div>
+                            <div key={detection.id} className="log-row">
+                                <span className={`sev ${detection.severity}`}>{detection.severity}</span>
+                                <span className="cat">{detection.primary_category}</span>
+                                <span>{detection.summary}</span>
+                                <span className="score">{Math.round(detection.anomaly_score * 100).toString().padStart(3, '0')}</span>
                             </div>
                         ))
                     )}
                 </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="quick-actions">
-                <h3>Quick Actions</h3>
-                <div className="actions-grid">
-                    <Link to="/webhooks" className="action-card">
-                        <div className="action-icon">🔗</div>
-                        <div className="action-content">
-                            <h4>Manage Webhooks</h4>
-                            <p>Configure monitoring endpoints</p>
-                        </div>
-                    </Link>
-
-                    <Link to="/settings/notifications" className="action-card">
-                        <div className="action-icon">🔔</div>
-                        <div className="action-content">
-                            <h4>Notification Settings</h4>
-                            <p>Customize alert routing</p>
-                        </div>
-                    </Link>
-
-                    <Link to="/analytics" className="action-card">
-                        <div className="action-icon">📊</div>
-                        <div className="action-content">
-                            <h4>View Analytics</h4>
-                            <p>Generate detailed reports</p>
-                        </div>
-                    </Link>
-                </div>
+            <div className="cmd-grid">
+                <Link to="/webhooks" className="cmd">
+                    <h4>01 Hooks</h4>
+                    <p>Register ingest endpoints and rotate secrets.</p>
+                </Link>
+                <Link to="/detections" className="cmd">
+                    <h4>02 Filter tape</h4>
+                    <p>Slice detections by severity and lookback.</p>
+                </Link>
+                <Link to="/analytics" className="cmd">
+                    <h4>03 Rollup</h4>
+                    <p>Severity mix and generated reports.</p>
+                </Link>
             </div>
         </div>
     );

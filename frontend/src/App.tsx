@@ -1,6 +1,6 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { Layout } from './components/layout/Layout';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
@@ -16,11 +16,13 @@ function App() {
                     <Routes>
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/signup" element={<SignupPage />} />
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/detections" element={<Detections />} />
-                        <Route path="/webhooks" element={<WebhooksManagement />} />
-                        <Route path="/analytics" element={<Analytics />} />
+                        <Route element={<Layout />}>
+                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                            <Route path="/dashboard" element={<Dashboard />} />
+                            <Route path="/detections" element={<Detections />} />
+                            <Route path="/webhooks" element={<WebhooksManagement />} />
+                            <Route path="/analytics" element={<Analytics />} />
+                        </Route>
                     </Routes>
                 </div>
             </AuthProvider>

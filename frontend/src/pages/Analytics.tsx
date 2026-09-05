@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { BarChart3, PieChart, TrendingUp, Download } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import type { AnalyticsOverview, Report } from '../types';
 import './Analytics.css';
@@ -36,10 +35,8 @@ export default function Analytics() {
                 report_type: 'detailed'
             });
             await loadData();
-            alert('Report generated successfully!');
         } catch (error) {
             console.error('Failed to generate report:', error);
-            alert('Failed to generate report');
         }
     };
 
@@ -47,83 +44,62 @@ export default function Analytics() {
         return <div className="loading-container"><div className="spinner"></div></div>;
     }
 
+    const sevColors: Record<string, string> = {
+        CRITICAL: 'var(--sev-crit)',
+        HIGH: 'var(--sev-high)',
+        MEDIUM: 'var(--sev-med)',
+        LOW: 'var(--sev-low)',
+        INFO: 'var(--sev-info)'
+    };
+
     return (
         <div className="analytics-page">
-            <div className="page-header">
+            <div className="page-head">
                 <div>
-                    <h1>Analytics Dashboard</h1>
-                    <p className="subtitle">Insights and trends from your security data</p>
+                    <h1>Rollup</h1>
+                    <p className="subtitle">Counts by severity. Color is the function, not a theme.</p>
                 </div>
                 <button className="primary-btn" onClick={handleGenerateReport}>
-                    <Download size={20} /> Generate Report
+                    Compile report
                 </button>
             </div>
 
-            {/* Overview Stats */}
-            <div className="analytics-grid">
-                <div className="analytics-card">
-                    <div className="card-header">
-                        <BarChart3 size={24} color="#3b82f6" />
-                        <h3>Total Detections</h3>
-                    </div>
-                    <div className="card-value">{overview?.total_detections || 0}</div>
-                    <div className="card-footer">
-                        <span>This week: {overview?.detections_this_week || 0}</span>
-                    </div>
+            <div className="metric-grid">
+                <div className="metric ok">
+                    <div className="k">Total</div>
+                    <div className="v">{overview?.total_detections || 0}</div>
+                    <div className="n">week {overview?.detections_this_week || 0}</div>
                 </div>
-
-                <div className="analytics-card">
-                    <div className="card-header">
-                        <TrendingUp size={24} color="#10b981" />
-                        <h3>Today's Activity</h3>
-                    </div>
-                    <div className="card-value">{overview?.detections_today || 0}</div>
-                    <div className="card-footer">
-                        <span>Last 24 hours</span>
-                    </div>
+                <div className="metric med">
+                    <div className="k">24h</div>
+                    <div className="v">{overview?.detections_today || 0}</div>
+                    <div className="n">activity</div>
                 </div>
-
-                <div className="analytics-card">
-                    <div className="card-header">
-                        <PieChart size={24} color="#f59e0b" />
-                        <h3>Categories</h3>
-                    </div>
-                    <div className="card-value">
-                        {Object.keys(overview?.by_category || {}).length}
-                    </div>
-                    <div className="card-footer">
-                        <span>Unique threat types</span>
-                    </div>
+                <div className="metric high">
+                    <div className="k">Classes</div>
+                    <div className="v">{Object.keys(overview?.by_category || {}).length}</div>
+                    <div className="n">categories</div>
                 </div>
             </div>
 
-            {/* Severity Breakdown */}
-            <div className="chart-section">
-                <h2>Severity Distribution</h2>
-                <div className="severity-bars">
+            <div className="panel">
+                <div className="panel-bar"><span>Severity mix</span></div>
+                <div className="panel-body sev-mix">
                     {Object.entries(overview?.by_severity || {}).map(([severity, count]) => {
-                        const colors: Record<string, string> = {
-                            CRITICAL: '#dc2626',
-                            HIGH: '#f59e0b',
-                            MEDIUM: '#3b82f6',
-                            LOW: '#10b981',
-                            INFO: '#6b7280'
-                        };
                         const total = overview?.total_detections || 1;
                         const percentage = ((count as number) / total) * 100;
-
                         return (
                             <div key={severity} className="severity-bar-item">
                                 <div className="severity-bar-header">
-                                    <span className="severity-label">{severity}</span>
-                                    <span className="severity-count">{count}</span>
+                                    <span className={`sev ${severity}`}>{severity}</span>
+                                    <span className="score">{count as number}</span>
                                 </div>
                                 <div className="severity-bar-track">
                                     <div
                                         className="severity-bar-fill"
                                         style={{
                                             width: `${percentage}%`,
-                                            backgroundColor: colors[severity]
+                                            backgroundColor: sevColors[severity]
                                         }}
                                     />
                                 </div>
@@ -133,40 +109,36 @@ export default function Analytics() {
                 </div>
             </div>
 
-            {/* Recent Reports */}
-            <div className="reports-section">
-                <h2>Recent Reports</h2>
-                {reports.length === 0 ? (
-                    <div className="empty-state">
-                        <p>No reports yet</p>
-                        <button className="primary-btn" onClick={handleGenerateReport}>
-                            Generate Your First Report
-                        </button>
-                    </div>
-                ) : (
-                    <div className="reports-list">
-                        {reports.map((report) => (
+            <div className="panel">
+                <div className="panel-bar"><span>Reports</span></div>
+                <div className="panel-body">
+                    {reports.length === 0 ? (
+                        <div className="empty-state">
+                            <p>NO COMPILED REPORTS</p>
+                            <button className="primary-btn" onClick={handleGenerateReport}>
+                                Compile first
+                            </button>
+                        </div>
+                    ) : (
+                        reports.map((report) => (
                             <div key={report.id} className="report-item">
                                 <div className="report-header">
-                                    <h4>{report.scope.toUpperCase()} Report</h4>
-                                    <span className="report-type">{report.report_type}</span>
-                                </div>
-                                <div className="report-stats">
-                                    <span>Total: {report.total_detections}</span>
-                                    <span className="critical">Critical: {report.critical_count}</span>
-                                    <span className="high">High: {report.high_count}</span>
-                                </div>
-                                <p className="report-summary">{report.executive_summary}</p>
-                                <div className="report-footer">
-                                    <span className="timestamp">
-                                        {new Date(report.generated_at).toLocaleString()}
-                                    </span>
+                                    <h4>{report.scope.toUpperCase()} // {report.report_type}</h4>
                                     <span className="risk-badge">{report.risk_assessment}</span>
                                 </div>
+                                <div className="report-stats">
+                                    <span>N={report.total_detections}</span>
+                                    <span className="sev CRITICAL">CRIT {report.critical_count}</span>
+                                    <span className="sev HIGH">HIGH {report.high_count}</span>
+                                </div>
+                                <p className="report-summary">{report.executive_summary}</p>
+                                <span className="timestamp">
+                                    {new Date(report.generated_at).toISOString().replace('T', ' ').slice(0, 19)}Z
+                                </span>
                             </div>
-                        ))}
-                    </div>
-                )}
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     );

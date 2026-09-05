@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, Tag, Trash2, RefreshCw } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import type { Webhook } from '../types';
 import './WebhooksManagement.css';
@@ -26,8 +25,7 @@ export default function WebhooksManagement() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this webhook?')) return;
-
+        if (!confirm('Delete this ingest hook?')) return;
         try {
             await apiClient.deleteWebhook(id);
             await loadWebhooks();
@@ -37,11 +35,10 @@ export default function WebhooksManagement() {
     };
 
     const handleRegenerateSecret = async (id: string) => {
-        if (!confirm('This will invalidate the current webhook secret. Continue?')) return;
-
+        if (!confirm('This invalidates the current shared secret. Continue?')) return;
         try {
             const result = await apiClient.regenerateWebhookSecret(id);
-            alert(`New secret: ${result.new_secret}`);
+            alert(`NEW SECRET: ${result.new_secret}`);
             await loadWebhooks();
         } catch (error) {
             console.error('Failed to regenerate secret:', error);
@@ -54,68 +51,51 @@ export default function WebhooksManagement() {
 
     return (
         <div className="webhooks-page">
-            <div className="page-header">
+            <div className="page-head">
                 <div>
-                    <h1>Webhooks Management</h1>
-                    <p className="subtitle">Configure and manage your monitoring endpoints</p>
+                    <h1>Ingest hooks</h1>
+                    <p className="subtitle">EasyConnect endpoints. Shared secret on the wire.</p>
                 </div>
                 <button className="primary-btn" onClick={() => setShowEditor(true)}>
-                    <Plus size={20} /> New Webhook
+                    New hook
                 </button>
             </div>
 
             {webhooks.length === 0 ? (
                 <div className="empty-state">
-                    <p>No webhooks configured</p>
+                    <p>NO HOOKS ARMED</p>
                     <button className="primary-btn" onClick={() => setShowEditor(true)}>
-                        Create Your First Webhook
+                        Arm first hook
                     </button>
                 </div>
             ) : (
-                <div className="webhooks-grid">
+                <div className="hook-table">
+                    <div className="hook-head">
+                        <span>NAME</span>
+                        <span>ALERT ID</span>
+                        <span>PRI</span>
+                        <span>EVENTS</span>
+                        <span></span>
+                    </div>
                     {webhooks.map((webhook) => (
-                        <div key={webhook.id} className="webhook-card">
-                            {webhook.is_primary && <div className="primary-badge">⭐ Primary</div>}
-
-                            <div className="webhook-header">
-                                <h3>{webhook.name}</h3>
-                                <span className="priority-badge">Priority: {webhook.webhook_priority}</span>
+                        <div key={webhook.id} className="hook-row">
+                            <div>
+                                <strong>{webhook.name}</strong>
+                                {webhook.is_primary && <span className="pri-flag"> PRIMARY</span>}
+                                {webhook.description && <p>{webhook.description}</p>}
                             </div>
-
-                            {webhook.description && (
-                                <p className="webhook-description">{webhook.description}</p>
-                            )}
-
-                            <div className="webhook-details">
-                                <div className="detail-row">
-                                    <span className="label">Alert ID:</span>
-                                    <code>{webhook.alert_id}</code>
-                                </div>
-                                <div className="detail-row">
-                                    <span className="label">Events:</span>
-                                    <span>{webhook.total_events}</span>
-                                </div>
-                            </div>
-
-                            {webhook.tags && webhook.tags.length > 0 && (
-                                <div className="tags">
-                                    {webhook.tags.map((tag, idx) => (
-                                        <span key={idx} className="tag">
-                                            <Tag size={12} /> {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="webhook-actions">
-                                <button onClick={() => { setEditingWebhook(webhook); setShowEditor(true); }}>
+                            <code>{webhook.alert_id}</code>
+                            <span className="score">{webhook.webhook_priority}</span>
+                            <span className="score">{webhook.total_events}</span>
+                            <div className="hook-actions">
+                                <button type="button" onClick={() => { setEditingWebhook(webhook); setShowEditor(true); }}>
                                     Edit
                                 </button>
-                                <button onClick={() => handleRegenerateSecret(webhook.id)}>
-                                    <RefreshCw size={16} /> Secret
+                                <button type="button" onClick={() => handleRegenerateSecret(webhook.id)}>
+                                    Secret
                                 </button>
-                                <button className="danger" onClick={() => handleDelete(webhook.id)}>
-                                    <Trash2 size={16} />
+                                <button type="button" className="danger" onClick={() => handleDelete(webhook.id)}>
+                                    Drop
                                 </button>
                             </div>
                         </div>
@@ -155,17 +135,17 @@ function WebhookEditorModal({ webhook, onClose, onSave }: any) {
             await onSave();
         } catch (error) {
             console.error('Failed to save webhook:', error);
-            alert('Failed to save webhook');
+            alert('SAVE FAILED');
         }
     };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h2>{webhook ? 'Edit Webhook' : 'New Webhook'}</h2>
+                <h2>{webhook ? 'Edit hook' : 'Arm hook'}</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label>Name *</label>
+                        <label>Name</label>
                         <input
                             type="text"
                             value={formData.name}
@@ -173,18 +153,16 @@ function WebhookEditorModal({ webhook, onClose, onSave }: any) {
                             required
                         />
                     </div>
-
                     <div className="form-group">
-                        <label>Description</label>
+                        <label>Notes</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={3}
                         />
                     </div>
-
                     <div className="form-group">
-                        <label>Alert ID *</label>
+                        <label>Alert ID</label>
                         <input
                             type="text"
                             value={formData.alert_id}
@@ -192,9 +170,8 @@ function WebhookEditorModal({ webhook, onClose, onSave }: any) {
                             required
                         />
                     </div>
-
                     <div className="form-group">
-                        <label>Priority (0-100)</label>
+                        <label>Priority {formData.webhook_priority}</label>
                         <input
                             type="range"
                             min="0"
@@ -202,9 +179,7 @@ function WebhookEditorModal({ webhook, onClose, onSave }: any) {
                             value={formData.webhook_priority}
                             onChange={(e) => setFormData({ ...formData, webhook_priority: parseInt(e.target.value) })}
                         />
-                        <span className="range-value">{formData.webhook_priority}</span>
                     </div>
-
                     <div className="form-group checkbox">
                         <label>
                             <input
@@ -212,13 +187,12 @@ function WebhookEditorModal({ webhook, onClose, onSave }: any) {
                                 checked={formData.is_primary}
                                 onChange={(e) => setFormData({ ...formData, is_primary: e.target.checked })}
                             />
-                            Mark as primary webhook
+                            Primary ingest
                         </label>
                     </div>
-
                     <div className="form-actions">
-                        <button type="button" onClick={onClose}>Cancel</button>
-                        <button type="submit" className="primary-btn">Save</button>
+                        <button type="button" onClick={onClose}>Abort</button>
+                        <button type="submit" className="primary-btn">Commit</button>
                     </div>
                 </form>
             </div>

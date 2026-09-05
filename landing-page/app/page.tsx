@@ -1,221 +1,139 @@
-import React from 'react';
-import { Shield, Zap, Activity, Globe, Database, Fingerprint, ExternalLink, Server } from 'lucide-react';
-
 export default function Home() {
   return (
-    <main className="app-container">
-      <div className="bg-grid"></div>
-      <div className="bg-glow"></div>
+    <main className="station">
+      <header className="topbar">
+        <a href="/" className="brand">
+          <strong>QRR</strong>
+          <span>RISK RADAR</span>
+        </a>
+        <nav className="links">
+          <a href="#watch">Watch</a>
+          <a href="#stack">Stack</a>
+          <a href="#deploy">Deploy</a>
+          <a href="https://github.com/HarishKarthickS/Qubic-Risk-Radar">Source</a>
+        </nav>
+        <span className="live">
+          <span className="pip" aria-hidden />
+          Station idle until you host it
+        </span>
+      </header>
 
-      {/* Navigation */}
-      <nav className="navbar">
-        <div className="container nav-inner">
-          <a href="/" className="brand">
-            <Fingerprint className="brand-icon" size={24} />
-            Qubic Risk Radar
-          </a>
-          <div className="nav-links">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#rules" className="nav-link">Rules Engine</a>
-            <a href="https://github.com/HarishKarthickS/Qubic-Risk-Radar" target="_blank" rel="noopener noreferrer" className="nav-link">Documentation</a>
+      <section className="hero" id="watch">
+        <div>
+          <p className="kicker">Qubic network operations // self-hosted</p>
+          <h1>Watch the chain. Page on rule fire.</h1>
+          <p className="lede">
+            FastAPI ingest for EasyConnect webhooks. Rules evaluate transfers and contract
+            events, incidents persist, Discord and Telegram get the page. Optional Gemini
+            scoring is a flag, not the product.
+          </p>
+          <div className="actions">
+            <a className="btn solid" href="#deploy">Bring up stack</a>
+            <a
+              className="btn ghost"
+              href="https://github.com/HarishKarthickS/Qubic-Risk-Radar"
+            >
+              Read the tape
+            </a>
           </div>
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="hero">
-        <div className="container">
-          <div className="hero-content">
-            <div className="tag">
-              <span className="live-dot" style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'currentColor', marginRight: 6 }}></span>
-              Self-Hosted Monitoring Layer
-            </div>
-            <h1>Secure your protocol with real-time intelligence.</h1>
-            <p>
-              An open-source surveillance stack for the Qubic ecosystem. Monitor smart contracts, 
-              detect whale movements, and automate threat mitigation instantly.
-            </p>
-            <div className="hero-actions">
-              <a href="#deploy" className="btn btn-primary">
-                Deploy Instance
-              </a>
-              <a href="https://github.com/HarishKarthickS/Qubic-Risk-Radar" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-                View Source <ExternalLink size={16} />
-              </a>
-            </div>
+        <div className="crt-frame" aria-label="Sample event tape">
+          <div className="crt-bar">
+            <span>TAPE // SAMPLE</span>
+            <span>SEV AS SIGNAL</span>
           </div>
-
-          {/* Code Preview */}
-          <div className="code-window" id="rules">
-            <div className="code-header">
-              <div className="window-controls">
-                <div className="control close"></div>
-                <div className="control min"></div>
-                <div className="control max"></div>
-              </div>
-              <div className="file-name">rules/whale_alert.py</div>
+          <div className="log">
+            <div className="row">
+              <span className="CRIT">CRIT</span>
+              <span>WHALE 12.4M QUBIC  src 0xA1.. → sink 0xC9..</span>
             </div>
-            <div className="code-content">
-              <div className="code-line">
-                <span className="line-num">1</span>
-                <span><span className="keyword">from</span> <span className="class">radar.rules</span> <span className="keyword">import</span> BaseRule, Threshold</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">2</span>
-                <span><span className="keyword">from</span> <span className="class">radar.actions</span> <span className="keyword">import</span> DiscordWebhook</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">3</span>
-                <span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">4</span>
-                <span><span className="keyword">class</span> <span className="class">WhaleMovement</span>(BaseRule):</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">5</span>
-                <span>    <span className="function">name</span> = <span className="string">"Large QUBIC Transfer"</span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">6</span>
-                <span>    <span className="function">description</span> = <span className="string">"Detects transfers exceeding 10M QUBIC"</span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">7</span>
-                <span>    </span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">8</span>
-                <span>    <span className="keyword">def</span> <span className="function">evaluate</span>(self, event):</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">9</span>
-                <span>        <span className="comment"># Trigger if transfer amount &gt; 10,000,000</span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">10</span>
-                <span>        <span className="keyword">return</span> event.amount &gt; <span className="number">10_000_000</span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">11</span>
-                <span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">12</span>
-                <span>    <span className="keyword">def</span> <span className="function">on_trigger</span>(self, event):</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">13</span>
-                <span>        DiscordWebhook.send(</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">14</span>
-                <span>            channel=<span className="string">"alerts-critical"</span>,</span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">15</span>
-                <span>            message=<span className="string">f"Whale Alert: &#123;event.amount&#125; moved from &#123;event.from_address&#125;"</span></span>
-              </div>
-              <div className="code-line">
-                <span className="line-num">16</span>
-                <span>        )</span>
-              </div>
+            <div className="row">
+              <span className="HIGH">HIGH</span>
+              <span>RULE hit  LargeTransfer  tick 1842291</span>
+            </div>
+            <div className="row">
+              <span className="MED">MED</span>
+              <span>HOOK retry  discord  latency 412ms</span>
+            </div>
+            <div className="row">
+              <span className="OK">OK</span>
+              <span>INGEST  easyconnect  secret match</span>
+            </div>
+            <div className="row">
+              <span className="OK">OK</span>
+              <span>QUEUE  incidents open=0  redis pong</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Row */}
-      <section className="stats-row">
-        <div className="container">
-          <div className="stats-grid">
-            <div className="stat-item">
-              <h4>&lt; 5ms</h4>
-              <p>Ingestion Latency</p>
-            </div>
-            <div className="stat-item">
-              <h4>100%</h4>
-              <p>Self-Hosted</p>
-            </div>
-            <div className="stat-item">
-              <h4>0</h4>
-              <p>Vendor Lock-in</p>
-            </div>
-            <div className="stat-item">
-              <h4>Open</h4>
-              <p>Source Architecture</p>
-            </div>
-          </div>
+      <div className="metrics">
+        <div className="metric">
+          <b>FASTAPI</b>
+          <span>Ingest + rules</span>
+        </div>
+        <div className="metric">
+          <b>SELF</b>
+          <span>Hosted by you</span>
+        </div>
+        <div className="metric">
+          <b>0</b>
+          <span>Vendor lock</span>
+        </div>
+        <div className="metric">
+          <b>SEV</b>
+          <span>Color = function</span>
+        </div>
+      </div>
+
+      <section className="section" id="stack">
+        <h2>What the station actually runs</h2>
+        <table className="matrix">
+          <thead>
+            <tr>
+              <th>Lane</th>
+              <th>Job</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>INGEST</td>
+              <td>Shared-secret webhooks from EasyConnect. Events land in Postgres with JSONB for later queries.</td>
+            </tr>
+            <tr>
+              <td>RULES</td>
+              <td>Python evaluators (thresholds, addresses, patterns). Dedup into an incident list operators can scan.</td>
+            </tr>
+            <tr>
+              <td>DISPATCH</td>
+              <td>Discord webhook/bot, Telegram, SMTP or SendGrid — only if you configure them.</td>
+            </tr>
+            <tr>
+              <td>CONSOLE</td>
+              <td>Vite operator UI: detection tape, hook secrets, severity rollup. Same CRT language as this page.</td>
+            </tr>
+            <tr>
+              <td>OPTIONAL</td>
+              <td>Gemini anomaly scoring when ENABLE_AI_DETECTION and GEMINI_API_KEY are set. Off by default.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section className="section" id="deploy">
+        <h2>Bring the stack up</h2>
+        <div className="deploy">
+          <p className="kicker">docker compose // see DEPLOY.md</p>
+          <pre>{`cp .env.example .env
+docker compose up --build
+# console :3000   api :8000`}</pre>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="features">
-        <div className="container">
-          <div className="section-head">
-            <h2>Industrial-grade infrastructure.</h2>
-            <p>Everything you need to monitor the network, built on top of a modern, asynchronous Python stack.</p>
-          </div>
-
-          <div className="feature-grid">
-            <div className="feature-card">
-              <div className="feature-icon"><Activity size={24} /></div>
-              <h3>Real-time Ingestion</h3>
-              <p>Connect directly to Qubic mainnet via EasyConnect webhooks. Capture every tick, transfer, and contract interaction instantly.</p>
-            </div>
-            
-            <div className="feature-card">
-              <div className="feature-icon"><Zap size={24} /></div>
-              <h3>Custom Rules Engine</h3>
-              <p>Write complex evaluation logic in pure Python. Filter events by threshold, address, or historical patterns before they execute.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon"><Shield size={24} /></div>
-              <h3>Multi-channel Dispatch</h3>
-              <p>Automate your incident response. Route critical alerts instantly to Discord, Telegram, or internal webhooks.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon"><Database size={24} /></div>
-              <h3>PostgreSQL Persistence</h3>
-              <p>Store normalized events safely in a structured database with JSONB indexing for rapid historical analysis and auditing.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon"><Globe size={24} /></div>
-              <h3>REST API</h3>
-              <p>Fully documented OpenAPI schema. Integrate the surveillance feed directly into your own trading bots or dashboards.</p>
-            </div>
-
-            <div className="feature-card">
-              <div className="feature-icon"><Server size={24} /></div>
-              <h3>Docker Native</h3>
-              <p>Deploy the entire stack (API, DB, Redis) with a single docker-compose command. Total privacy, absolute sovereignty.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-top">
-            <div className="brand">
-              <Fingerprint className="brand-icon" size={24} />
-              Qubic Risk Radar
-            </div>
-            <div className="footer-links">
-              <a href="#features">Features</a>
-              <a href="#rules">Rules Engine</a>
-              <a href="https://github.com/HarishKarthickS/Qubic-Risk-Radar" target="_blank" rel="noopener noreferrer">GitHub</a>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2025 Qubic Risk Radar. Open Source.</p>
-            <p>Built for the Qubic Ecosystem.</p>
-          </div>
-        </div>
+      <footer className="foot">
+        <span>QRR // MIT // Qubic ecosystem</span>
+        <span>Not a billed SaaS. Run your own station.</span>
       </footer>
     </main>
   );

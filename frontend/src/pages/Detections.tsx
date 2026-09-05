@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { apiClient } from '../api/client';
 import type { Detection } from '../types';
 import './Detections.css';
@@ -36,24 +35,15 @@ export default function Detections() {
         }
     };
 
-    const severityColors: Record<string, string> = {
-        CRITICAL: '#dc2626',
-        HIGH: '#f59e0b',
-        MEDIUM: '#3b82f6',
-        LOW: '#10b981',
-        INFO: '#6b7280'
-    };
-
     return (
         <div className="detections-page">
-            <div className="page-header">
+            <div className="page-head">
                 <div>
-                    <h1>AI Detections</h1>
-                    <p className="subtitle">Browse and analyze security detections</p>
+                    <h1>Detection tape</h1>
+                    <p className="subtitle">Severity is the signal. Filter the queue, do not decorate it.</p>
                 </div>
             </div>
 
-            {/* Filters */}
             <div className="filters-bar">
                 <div className="filter-group">
                     <label>Severity</label>
@@ -61,110 +51,86 @@ export default function Detections() {
                         value={filters.severity}
                         onChange={(e) => setFilters({ ...filters, severity: e.target.value })}
                     >
-                        <option value="">All Severities</option>
-                        <option value="CRITICAL">Critical</option>
-                        <option value="HIGH">High</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="LOW">Low</option>
-                        <option value="INFO">Info</option>
+                        <option value="">ALL</option>
+                        <option value="CRITICAL">CRITICAL</option>
+                        <option value="HIGH">HIGH</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="LOW">LOW</option>
+                        <option value="INFO">INFO</option>
                     </select>
                 </div>
 
                 <div className="filter-group">
-                    <label>Time Range</label>
+                    <label>Lookback</label>
                     <select
                         value={filters.days}
                         onChange={(e) => setFilters({ ...filters, days: parseInt(e.target.value) })}
                     >
-                        <option value={1}>Last 24 hours</option>
-                        <option value={7}>Last 7 days</option>
-                        <option value={30}>Last 30 days</option>
-                        <option value={90}>Last 90 days</option>
+                        <option value={1}>24H</option>
+                        <option value={7}>7D</option>
+                        <option value={30}>30D</option>
+                        <option value={90}>90D</option>
                     </select>
                 </div>
 
                 <button className="refresh-btn" onClick={loadDetections}>
-                    Refresh
+                    Reload
                 </button>
             </div>
 
-            {/* Detections List */}
             {loading ? (
                 <div className="loading-container">
                     <div className="spinner"></div>
-                    <p>Loading detections...</p>
+                    <p>Reading tape…</p>
                 </div>
             ) : detections.length === 0 ? (
                 <div className="empty-state">
-                    <p>No detections found</p>
-                    <p className="empty-subtitle">Try adjusting your filters</p>
+                    <p>NO ROWS</p>
+                    <p className="subtitle">Widen lookback or drop the severity gate.</p>
                 </div>
             ) : (
                 <>
-                    <div className="detections-grid">
+                    <div className="tape">
+                        <div className="tape-head">
+                            <span>SEV</span>
+                            <span>CAT</span>
+                            <span>SUMMARY</span>
+                            <span>CONF</span>
+                            <span>ANOM</span>
+                            <span>UTC</span>
+                        </div>
                         {detections.map((detection) => (
-                            <div key={detection.id} className="detection-item">
-                                <div className="detection-item-header">
-                                    <span
-                                        className="severity-badge"
-                                        style={{ backgroundColor: severityColors[detection.severity] }}
-                                    >
-                                        {detection.severity}
-                                    </span>
-                                    <span className="confidence-badge">
-                                        Confidence: {Math.round(detection.confidence * 100)}%
-                                    </span>
-                                </div>
-
-                                <div className="detection-item-body">
-                                    <div className="category">{detection.primary_category}</div>
+                            <div key={detection.id} className="tape-row">
+                                <span className={`sev ${detection.severity}`}>{detection.severity}</span>
+                                <span className="cat">{detection.primary_category}</span>
+                                <div>
                                     <p className="summary">{detection.summary}</p>
-
-                                    {detection.detected_patterns && detection.detected_patterns.length > 0 && (
-                                        <div className="patterns">
-                                            <strong>Patterns:</strong>
-                                            <div className="pattern-tags">
-                                                {detection.detected_patterns.slice(0, 3).map((pattern, idx) => (
-                                                    <span key={idx} className="pattern-tag">{pattern}</span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {detection.recommendations && detection.recommendations.length > 0 && (
-                                        <div className="recommendations">
-                                            <strong>Recommendations:</strong>
-                                            <ul>
-                                                {detection.recommendations.slice(0, 2).map((rec, idx) => (
-                                                    <li key={idx}>{rec}</li>
-                                                ))}
-                                            </ul>
+                                    {!!detection.detected_patterns?.length && (
+                                        <div className="pattern-tags">
+                                            {detection.detected_patterns.slice(0, 3).map((pattern, idx) => (
+                                                <span key={idx} className="pattern-tag">{pattern}</span>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
-
-                                <div className="detection-item-footer">
-                                    <span className="timestamp">
-                                        {new Date(detection.created_at).toLocaleString()}
-                                    </span>
-                                    <span className="anomaly-score">
-                                        Anomaly: {Math.round(detection.anomaly_score * 100)}%
-                                    </span>
-                                </div>
+                                <span className="score">{Math.round(detection.confidence * 100)}</span>
+                                <span className="score">{Math.round(detection.anomaly_score * 100)}</span>
+                                <span className="timestamp">
+                                    {new Date(detection.created_at).toISOString().slice(0, 16).replace('T', ' ')}
+                                </span>
                             </div>
                         ))}
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="pagination">
                             <button
                                 onClick={() => setPage(p => Math.max(1, p - 1))}
                                 disabled={page === 1}
                             >
-                                Previous
+                                Prev
                             </button>
-                            <span>Page {page} of {totalPages}</span>
+                            <span>{page} / {totalPages}</span>
                             <button
                                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                 disabled={page === totalPages}
